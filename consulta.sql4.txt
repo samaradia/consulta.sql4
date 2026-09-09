@@ -1,0 +1,116 @@
+-- ============================================================
+-- CONSULTAS SQL - DATAS, PRAZOS E EMPRÉSTIMOS
+-- ============================================================
+
+
+-- ============================================================
+-- 1. DATA E HORA ATUAL
+-- ============================================================
+
+SELECT CURRENT_TIMESTAMP AS data_hora_atual;
+
+
+-- ============================================================
+-- 2. FORMATAR DATA DE NASCIMENTO
+-- ============================================================
+
+SELECT 
+    Nome,
+    STRFTIME('%Y-%m-%d', DataNascimento) AS DataFormatada
+FROM TabelaClientes;
+
+
+-- ============================================================
+-- 3. CALCULAR DIAS TOTAIS DO EMPRÉSTIMO
+-- ============================================================
+
+SELECT 
+    id_emprestimo,
+    JULIANDAY(
+        DATE(DataInicio, '+' || Prazo || ' days')
+    ) - JULIANDAY(DataInicio) AS DiasTotais
+FROM TabelaEmprestimo;
+
+
+-- ============================================================
+-- 4. PEGAR O ANO DE NASCIMENTO DOS CLIENTES
+-- ============================================================
+
+SELECT 
+    Nome,
+    STRFTIME('%Y', DataNascimento) AS AnoClientes
+FROM TabelaClientes;
+
+
+-- ============================================================
+-- 5. BUSCAR EMPRÉSTIMOS ENTRE DUAS DATAS
+-- ============================================================
+
+SELECT *
+FROM TabelaEmprestimo
+WHERE DataInicio BETWEEN '2023-01-01' AND '2023-03-31';
+
+
+-- ============================================================
+-- 6. CALCULAR DATA DE VENCIMENTO DO EMPRÉSTIMO
+-- ============================================================
+
+SELECT 
+    id_emprestimo,
+    DataInicio,
+    DATE(
+        DataInicio, 
+        '+' || Prazo || ' days'
+    ) AS DataVencimento
+FROM TabelaEmprestimo;
+
+
+-- ============================================================
+-- 7. ORDENAR PAGAMENTOS POR DATA CRESCENTE
+-- ============================================================
+
+SELECT *
+FROM TabelaPagamentos
+ORDER BY DataPagamento ASC;
+
+
+-- ============================================================
+-- 8. CALCULAR IDADE DOS CLIENTES
+-- ============================================================
+
+SELECT 
+    Nome,
+    (
+        STRFTIME('%Y', 'now') 
+        - STRFTIME('%Y', DataNascimento)
+    ) 
+    - (
+        STRFTIME('%m', 'now') 
+        < STRFTIME('%m', DataNascimento)
+    ) AS Idade
+FROM TabelaClientes;
+
+
+-- ============================================================
+-- 9. VERIFICAR STATUS DO EMPRÉSTIMO
+-- ============================================================
+
+SELECT 
+    id_emprestimo,
+    CASE
+        WHEN DATE(DataInicio, '+' || Prazo || ' days') < DATE('now')
+            THEN 'Vencido'
+        ELSE 'No Prazo'
+    END AS StatusEmprestimo
+FROM TabelaEmprestimo;
+
+
+-- ============================================================
+-- 10. CALCULAR PRÓXIMO PAGAMENTO
+-- ============================================================
+
+SELECT 
+    id_emprestimo,
+    DataInicio,
+    DATE(DataInicio, '+30 days') AS ProximoPagamento
+FROM TabelaEmprestimo;
